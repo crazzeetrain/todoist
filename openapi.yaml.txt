@@ -1,19 +1,144 @@
 openapi: 3.0.1
 info:
-  title: My Todoist Plugin
-  version: 'v1'
+  title: Todoist GPT Plugin
+  description: |
+    A plugin that integrates ChatGPT with Todoist. 
+    Create tasks, list tasks, delete tasks or projects, 
+    and handle your GTD labels and natural-language dates.
+  version: "v1"
 paths:
-  /tasks:
+  /hello:
     get:
-      operationId: getTasks
-      description: Get tasks from Todoist
+      operationId: hello
+      summary: Say hello to test the server
       responses:
-        '200':
-          description: OK
+        "200":
+          description: Successful response
+  /oauth/authorize:
+    get:
+      operationId: authorize
+      summary: Begin OAuth with Todoist
+      parameters:
+      - in: query
+        name: user_id
+        schema:
+          type: string
+        required: false
+      responses:
+        "200":
+          description: Successful response
+  /oauth/callback:
+    get:
+      operationId: callback
+      summary: OAuth callback from Todoist
+      parameters:
+      - in: query
+        name: code
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: state
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+  /create_task:
     post:
       operationId: createTask
-      description: Create a new task
+      summary: Create a task in Todoist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                content:
+                  type: string
+                project_id:
+                  type: integer
+                section_id:
+                  type: integer
+                due_string:
+                  type: string
+                labels:
+                  type: array
+                  items:
+                    type: string
+                priority:
+                  type: integer
       responses:
-        '200':
-          description: OK
-  ...
+        "200":
+          description: Successful response
+  /get_projects:
+    get:
+      operationId: getProjects
+      summary: Get all Todoist projects
+      parameters:
+      - in: query
+        name: user_id
+        schema:
+          type: string
+        required: false
+      responses:
+        "200":
+          description: Successful response
+  /delete_project:
+    delete:
+      operationId: deleteProject
+      summary: Delete a project in Todoist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                project_id:
+                  type: integer
+      responses:
+        "200":
+          description: Successful response
+  /delete_task:
+    delete:
+      operationId: deleteTask
+      summary: Delete a task in Todoist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                task_id:
+                  type: integer
+      responses:
+        "200":
+          description: Successful response
+  /get_tasks:
+    get:
+      operationId: getTasks
+      summary: Get tasks from a project or all tasks
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: project_id
+          schema:
+            type: integer
+          required: false
+      responses:
+        "200":
+          description: Successful response
