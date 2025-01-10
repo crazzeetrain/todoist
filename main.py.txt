@@ -1,0 +1,6 @@
+my_todoist_plugin/
+├─ main.py            # Our FastAPI server code (see below)
+├─ manifest.json      # Already created/hosted
+├─ openapi.yaml       # Already created/hosted
+├─ requirements.txt   # Python dependencies
+└─ ...
