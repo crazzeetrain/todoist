@@ -1,6 +1,127 @@
-my_todoist_plugin/
-├─ main.py            # Our FastAPI server code (see below)
-├─ manifest.json      # Already created/hosted
-├─ openapi.yaml       # Already created/hosted
-├─ requirements.txt   # Python dependencies
-└─ ...
+import os
+import requests
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, JSONResponse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (if you're using one)
+load_dotenv()
+
+TODOIST_CLIENT_ID = os.getenv("TODOIST_CLIENT_ID", "ecd65b0940b44ca89e307c9e53b6b2be")
+TODOIST_CLIENT_SECRET = os.getenv("TODOIST_CLIENT_SECRET", "63002a82bedf42cbac0a92295547aebc")
+
+# In a real-world app, you'd store user tokens in a database.
+# For a simple demo, we’ll just store it in memory (dict) while the app is running.
+USER_TOKENS = {}
+
+app = FastAPI()
+
+@app.get("/hello")
+def say_hello():
+    return {"message": "Hello from the GPT Todoist plugin!"}
+
+# 1) Start OAuth flow (ChatGPT or user triggers this endpoint to authorize Todoist)
+@app.get("/oauth/authorize")
+def oauth_authorize(user_id: str = "demo_user"):
+    """
+    This endpoint redirects the user to Todoist's auth page.
+    The user_id parameter is optional (to identify the user in your system).
+    """
+
+    # The scope you need (e.g., data:read_write)
+    # Add any additional scopes like "data:delete" if needed
+    scope = "data:read_write"
+
+    # A unique string to protect against CSRF. We'll just use user_id for demo
+    state = user_id
+
+    # Redirect to Todoist's OAuth endpoint
+    authorize_url = (
+        "https://todoist.com/oauth/authorize"
+        f"?client_id={TODOIST_CLIENT_ID}"
+        f"&scope={scope}"
+        f"&state={state}"
+    )
+
+    return RedirectResponse(authorize_url)
+
+# 2) Handle the callback from Todoist (where we exchange the code for an access_token)
+@app.get("/oauth/callback")
+def oauth_callback(code: str, state: str):
+    """
+    Todoist redirects back here with "code" (authorization code) and "state".
+    We exchange code for access_token. 
+    """
+
+    # Exchange code for access_token
+    token_url = "https://todoist.com/oauth/access_token"
+    payload = {
+        "client_id": TODOIST_CLIENT_ID,
+        "client_secret": TODOIST_CLIENT_SECRET,
+        "code": code,
+        # "redirect_uri": "YOUR_REDIRECT_URI"  # If needed
+    }
+
+    response = requests.post(token_url, data=payload)
+    if response.status_code == 200:
+        token_data = response.json()
+        access_token = token_data["access_token"]
+
+        # Save the token in memory (for your real app, store in DB)
+        USER_TOKENS[state] = access_token
+
+        return JSONResponse(
+            {"message": "OAuth success!", "access_token": access_token}
+        )
+    else:
+        return JSONResponse(
+            {"error": "Failed to exchange token", "details": response.text},
+            status_code=400,
+        )
+
+# 3) Example endpoint: Create a Task in Todoist
+@app.post("/create_task")
+async def create_task(request: Request):
+    """
+    ChatGPT (the plugin) can call this endpoint to create a new task.
+    Expects JSON with 'content', 'project_id', 'section_id' (optional), etc.
+    """
+    data = await request.json()
+    user_id = data.get("user_id", "demo_user")  # however you identify the user
+    content = data.get("content", "Default Task Content")
+    project_id = data.get("project_id")
+    section_id = data.get("section_id")  # optional
+    due_string = data.get("due_string")  # e.g. "Tomorrow at 14:00"
+
+    # Retrieve user token
+    access_token = USER_TOKENS.get(user_id)
+    if not access_token:
+        return JSONResponse(
+            {"error": "User not authorized. Please complete OAuth first."},
+            status_code=401
+        )
+
+    # Build the request to Todoist's API
+    url = "https://api.todoist.com/rest/v2/tasks"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "content": content
+    }
+    if project_id:
+        payload["project_id"] = project_id
+    if section_id:
+        payload["section_id"] = section_id
+    if due_string:
+        payload["due_string"] = due_string
+
+    resp = requests.post(url, headers=headers, json=payload)
+    if resp.status_code == 200 or resp.status_code == 204:
+        return {"message": "Task created successfully", "data": resp.json()}
+    else:
+        return JSONResponse(
+            {"error": "Failed to create task", "details": resp.text},
+            status_code=400
+        )
