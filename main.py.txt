@@ -38,7 +38,7 @@ def oauth_authorize(user_id: str = "demo_user"):
     # Redirect to Todoist's OAuth endpoint
     authorize_url = (
         "https://todoist.com/oauth/authorize"
-        f"?client_id={TODOIST_CLIENT_ID}"
+        f"?client_id={ecd65b0940b44ca89e307c9e53b6b2be}"
         f"&scope={scope}"
         f"&state={state}"
     )
@@ -56,8 +56,8 @@ def oauth_callback(code: str, state: str):
     # Exchange code for access_token
     token_url = "https://todoist.com/oauth/access_token"
     payload = {
-        "client_id": TODOIST_CLIENT_ID,
-        "client_secret": TODOIST_CLIENT_SECRET,
+        "client_id": ecd65b0940b44ca89e307c9e53b6b2be,
+        "client_secret": 63002a82bedf42cbac0a92295547aebc,
         "code": code,
         # "redirect_uri": "YOUR_REDIRECT_URI"  # If needed
     }
