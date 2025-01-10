@@ -1,18 +1,18 @@
 {
   "schema_version": "v1",
-  "name_for_human": "My Todoist Plugin",
-  "name_for_model": "my_todoist_plugin",
-  "description_for_human": "Manage Todoist tasks",
-  "description_for_model": "Plugin that lets you read, create, and update Todoist tasks...",
+  "name_for_human": "My Todoist GPT Plugin",
+  "name_for_model": "todoist_plugin",
+  "description_for_human": "Manage your Todoist tasks, projects, and more via ChatGPT.",
+  "description_for_model": "Plugin that integrates ChatGPT with Todoist for reading, creating, deleting, and organizing tasks and projects. Handles natural language due dates and GTD labels like @phone.",
   "auth": {
     "type": "oauth",
     "client_url": "https://<YOUR_DOMAIN>/oauth/authorize",
-    "scope": "data:read_write"
+    "scope": "data:read_write,data:delete,project:delete"
   },
   "api": {
     "url": "https://<YOUR_DOMAIN>/openapi.yaml"
   },
   "logo_url": "https://<YOUR_DOMAIN>/logo.png",
-  "contact_email": "YOUR_EMAIL",
-  "legal_info_url": "YOUR_LEGAL_URL"
+  "contact_email": "you@example.com",
+  "legal_info_url": "https://example.com/legal"
 }
