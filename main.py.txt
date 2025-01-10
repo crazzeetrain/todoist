@@ -22,7 +22,7 @@ def say_hello():
 
 # 1) Start OAuth flow (ChatGPT or user triggers this endpoint to authorize Todoist)
 @app.get("/oauth/authorize")
-def oauth_authorize(user_id: str = "demo_user"):
+def oauth_authorize(user_id: str = "me@johnpulley.com"):
     """
     This endpoint redirects the user to Todoist's auth page.
     The user_id parameter is optional (to identify the user in your system).
