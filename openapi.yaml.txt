@@ -1,0 +1,19 @@
+openapi: 3.0.1
+info:
+  title: My Todoist Plugin
+  version: 'v1'
+paths:
+  /tasks:
+    get:
+      operationId: getTasks
+      description: Get tasks from Todoist
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: createTask
+      description: Create a new task
+      responses:
+        '200':
+          description: OK
+  ...
