@@ -6,11 +6,11 @@
   "description_for_model": "Plugin that integrates ChatGPT with Todoist for reading, creating, deleting, and organizing tasks and projects. Handles natural language due dates and GTD labels like @phone.",
   "auth": {
     "type": "oauth",
-    "client_url": "https://<YOUR_DOMAIN>/oauth/authorize",
+    "client_url": "https://todoist-tc70.onrender.com/oauth/authorize",
     "scope": "data:read_write,data:delete,project:delete"
   },
   "api": {
-    "url": "https://<YOUR_DOMAIN>/openapi.yaml"
+    "url": "https://todoist-tc70.onrender.com/openapi.yaml"
   },
   "logo_url": "https://<YOUR_DOMAIN>/logo.png",
   "contact_email": "you@example.com",
